@@ -1,20 +1,16 @@
 const router = require("express").Router();
-// imports user, post, and comment models
 const { User, Post, Comment } = require("../../models");
-
-// GET '/api/users' find all of this users data except the password
 router.get("/", (req, res) => {
   User.findAll({
     attributes: { exclude: ["[password"] },
   })
-    .then((userData) => res.json(userData))
+    .then((dbUserData) => res.json(dbUserData))
     .catch((err) => {
       console.log(err);
       res.status(500).json(err);
     });
 });
 
-// GET by id when user click on this id, get back user info except the password
 router.get("/:id", (req, res) => {
   User.findOne({
     attributes: { exclude: ["password"] },
@@ -41,12 +37,12 @@ router.get("/:id", (req, res) => {
       },
     ],
   })
-    .then((userData) => {
-      if (!userData) {
+    .then((dbUserData) => {
+      if (!dbUserData) {
         res.status(404).json({ message: "No user found with this id" });
         return;
       }
-      res.json(userData);
+      res.json(dbUserData);
     })
     .catch((err) => {
       console.log(err);
@@ -54,20 +50,19 @@ router.get("/:id", (req, res) => {
     });
 });
 
-// POST route when user signs up, log to their session
 router.post("/", (req, res) => {
   User.create({
     username: req.body.username,
     password: req.body.password,
   })
 
-    .then((userData) => {
+    .then((dbUserData) => {
       req.session.save(() => {
-        req.session.user_id = userData.id;
-        req.session.username = userData.username;
+        req.session.user_id = dbUserData.id;
+        req.session.username = dbUserData.username;
         req.session.loggedIn = true;
 
-        res.json(userData);
+        res.json(dbUserData);
       });
     })
     .catch((err) => {
@@ -76,30 +71,29 @@ router.post("/", (req, res) => {
     });
 });
 
-// post '/login' when user clicks login button, find their corresponding username
 router.post("/login", (req, res) => {
   User.findOne({
     where: {
       username: req.body.username,
     },
   })
-    .then((userData) => {
-      if (!userData) {
+    .then((dbUserData) => {
+      if (!dbUserData) {
         res.status(400).json({ message: "No user with that username!" });
         return;
       }
-      const validPassword = userData.checkPassword(req.body.password);
+      const validPassword = dbUserData.checkPassword(req.body.password);
 
       if (!validPassword) {
         res.status(400).json({ message: "Incorrect password!" });
         return;
       }
       req.session.save(() => {
-        req.session.user_id = userData.id;
-        req.session.username = userData.username;
+        req.session.user_id = dbUserData.id;
+        req.session.username = dbUserData.username;
         req.session.loggedIn = true;
 
-        res.json({ user: userData, message: "You are now logged in!" });
+        res.json({ user: dbUserData, message: "You are now logged in!" });
       });
     })
     .catch((err) => {
@@ -108,7 +102,6 @@ router.post("/login", (req, res) => {
     });
 });
 
-// POST 'logout' when user clicks logout, destroy sessions
 router.post("/logout", (req, res) => {
   if (req.session.loggedIn) {
     req.session.destroy(() => {
@@ -117,6 +110,45 @@ router.post("/logout", (req, res) => {
   } else {
     res.status(404).end();
   }
+});
+
+router.put("/:id", (req, res) => {
+  User.update(req.body, {
+    individualHooks: true,
+    where: {
+      id: req.params.id,
+    },
+  })
+    .then((dbUserData) => {
+      if (!dbUserData[0]) {
+        res.status(404).json({ message: "No user found with this id" });
+        return;
+      }
+      res.json(dbUserData);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json(err);
+    });
+});
+
+router.delete("/:id", (req, res) => {
+  User.destroy({
+    where: {
+      id: req.params.id,
+    },
+  })
+    .then((dbUserData) => {
+      if (!dbUserData) {
+        res.status(404).json({ message: "No user found with this id" });
+        return;
+      }
+      res.json(dbUserData);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json(err);
+    });
 });
 
 module.exports = router;

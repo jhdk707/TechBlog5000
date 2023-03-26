@@ -2,20 +2,19 @@ const { Post } = require("../models");
 
 const postData = [
   {
-    title: "Title One",
-    body: "Praesent ultrices orci ut augue condimentum eleifend.",
+    title: "VS CODE",
+    content: "Extenstion, File Explorer, Formatting, Prettier, Colored tags.",
     user_id: 1,
   },
   {
-    title: "Title Two",
-    body: "Sed feugiat leo sit amet libero finibus euismod. Nulla viverra vulputate eleifend.",
-
+    title: "MySQL Database code",
+    content: "MySQL makes it easy to manage databases.",
     user_id: 2,
   },
   {
-    title: "Another Title",
-    body: "Donec vitae enim in nulla tincidunt malesuada. Duis ac lacus mauris. Suspendisse non mi malesuada erat egestas porttitor id a turpis. Vivamus id libero urna. Nam tincidunt quam vitae turpis sodales, a convallis odio scelerisque.",
-
+    title: "Laptops for Coding Productivity",
+    content:
+      "Lenovo ThinkPad T16 laptop is lightweight, sturdy for working remotely, powerful, secure and discreet in appearance.",
     user_id: 3,
   },
 ];
